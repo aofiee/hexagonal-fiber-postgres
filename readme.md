@@ -2,3 +2,25 @@ insert into customers set customers.customer_id = 2,customers.name = 'Arnon',cus
 
 
 insert into customers (created_at,updated_at,customer_id,name,date_of_birth,city,zip_code,status) VALUES (Current_timestamp, Current_timestamp, 2, 'Arnon',Current_timestamp , 'bangkok','10250',1 )
+
+
+http://localhost:3000/graph
+
+{
+  GetCustomer(id: 2) {
+    city
+    customer_id
+    date_of_birth
+    name
+    status
+    zip_code
+  }
+}
+
+
+{
+  GetCustomers {
+    customer_id
+    name  
+  }
+}
