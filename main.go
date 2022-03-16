@@ -4,14 +4,13 @@ import (
 	"hexagonal/architecture/handler"
 	"hexagonal/architecture/repository"
 	"hexagonal/architecture/resolver"
-	myschema "hexagonal/architecture/schema"
+	"hexagonal/architecture/schema"
 	"hexagonal/architecture/service"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
@@ -39,7 +38,7 @@ func main() {
 	customerHandler := handler.NewCustomerHandler(customerService)
 
 	cResolver := resolver.NewCustomerResolver(customerService)
-	cSchema := myschema.NewCustomerSchema(cResolver)
+	cSchema := schema.NewCustomerSchema(cResolver)
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query: cSchema.Query(),
 	})
@@ -55,7 +54,6 @@ func main() {
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
-	app.Static("/static", "../public")
 	app.Use(requestid.New())
 	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format:     "[${time}] ${method} ${path}",
@@ -121,12 +119,4 @@ func createDatabaseConnection(dial gorm.Dialector, dns string) (db *gorm.DB, err
 
 	mydb.AutoMigrate(&repository.Customer{})
 	return mydb, nil
-}
-
-func PlaygroundHandler(c *fiber.Ctx) error {
-	h := playground.Handler("GraphQL", "/query")
-	fasthttpadaptor.NewFastHTTPHandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		h.ServeHTTP(writer, request)
-	})(c.Context())
-	return nil
 }
