@@ -1,0 +1,89 @@
+package main
+
+import (
+	"hexagonal/architecture/handler"
+	"hexagonal/architecture/repository"
+	"hexagonal/architecture/service"
+	"log"
+	"os"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+)
+
+func main() {
+	dns := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Bangkok"
+	dial := postgres.Open(dns)
+	// dns := "root:password@tcp(localhost:3306)/dd_hakka?charset=utf8mb4&parseTime=True&loc=Local"
+	// dial := mysql.Open(dns)
+	db, err := createDatabaseConnection(dial, dns)
+	if err != nil {
+		log.Println(err)
+	}
+
+	customerRepo := repository.NewCustomerRepository(db)
+	customerService := service.NewCustomerService(customerRepo)
+	customerHandler := handler.NewCustomerHandler(customerService)
+
+	app := fiber.New(fiber.Config{
+		BodyLimit: 100 * 1024 * 1024,
+	})
+	app.Static("/static", "../public")
+	app.Use(requestid.New())
+	app.Use(fiberLogger.New(fiberLogger.Config{
+		Format:     "[${time}] ${method} ${path}",
+		TimeFormat: "02-Jan-2006",
+		TimeZone:   "Asia/Bangkok",
+	}))
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept,Authorization",
+	}))
+
+	app.Get("/customer/:id", customerHandler.GetCustomer)
+	app.Get("/customers", customerHandler.GetCustomers)
+	err = app.Listen(":3000")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func createDatabaseConnection(dial gorm.Dialector, dns string) (db *gorm.DB, err error) {
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
+	}
+	time.Local = loc
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold: time.Second,
+			LogLevel:      logger.Error,
+			Colorful:      true,
+		},
+	)
+
+	mydb, err := gorm.Open(dial, &gorm.Config{
+		Logger: newLogger,
+	})
+	if err != nil {
+		return nil, err
+	}
+	sqlDB, err := mydb.DB()
+	if err != nil {
+		return nil, err
+	}
+	sqlDB.SetMaxIdleConns(50)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxOpenConns(100)
+
+	mydb.AutoMigrate(&repository.Customer{})
+	return mydb, nil
+}
