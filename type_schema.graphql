@@ -1,0 +1,13 @@
+type Customer {
+    CustomerID Int!
+    Name String!
+    DateOfBirth String!
+    City String!
+    ZipCode String!
+    Status Int!
+}
+
+type Query {
+    GetCustomer(id: Int): Customer
+    GetCustomers(): [Customer]
+}
