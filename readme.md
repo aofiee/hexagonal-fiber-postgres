@@ -37,4 +37,8 @@ http://localhost:3000/graph
     name
   }
 }
+
+mutation {
+  CreateCustomer(CustomerID: 3, Name: "Kano", DateOfBirth: "1981-02-14", City: "Bangkok", ZipCode: "10250", Status: 1)
+}
 ```

@@ -45,3 +45,26 @@ func (c customerService) GetCustomers() ([]CustomerRes, error) {
 	}
 	return customerRes, nil
 }
+
+func (c customerService) CreateCustomer(customer *CustomerRes) (CustomerRes, error) {
+	newCus := repository.Customer{
+		CustomerID:  customer.CustomerID,
+		Name:        customer.Name,
+		DateOfBirth: customer.DateOfBirth,
+		City:        customer.City,
+		ZipCode:     customer.ZipCode,
+		Status:      customer.Status,
+	}
+	res, err := c.customerRepository.CreateCustomer(&newCus)
+	if err != nil {
+		return CustomerRes{}, err
+	}
+	return CustomerRes{
+		CustomerID:  res.CustomerID,
+		Name:        res.Name,
+		DateOfBirth: res.DateOfBirth,
+		City:        res.City,
+		ZipCode:     res.ZipCode,
+		Status:      res.Status,
+	}, nil
+}

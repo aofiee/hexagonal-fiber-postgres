@@ -26,5 +26,6 @@ type (
 	CustomerRepository interface {
 		GetAll() ([]Customer, error)
 		GetByID(id int) (*Customer, error)
+		CreateCustomer(customer *Customer) (Customer, error)
 	}
 )

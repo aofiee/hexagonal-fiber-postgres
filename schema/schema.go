@@ -70,3 +70,37 @@ func (c customerSchema) Query() *graphql.Object {
 
 	return graphql.NewObject(objectConfig)
 }
+
+func (c customerSchema) Mutation() *graphql.Object {
+	objectConfig := graphql.ObjectConfig{
+		Name: "Mutation",
+		Fields: graphql.Fields{
+			"CreateCustomer": &graphql.Field{
+				Type:        graphql.String,
+				Description: "Store a new customer",
+				Args: graphql.FieldConfigArgument{
+					"CustomerID": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+					"Name": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"DateOfBirth": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"City": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"ZipCode": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"Status": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+				},
+				Resolve: c.customerResolver.CreateCustomer,
+			},
+		},
+	}
+	return graphql.NewObject(objectConfig)
+}

@@ -40,7 +40,8 @@ func main() {
 	cResolver := resolver.NewCustomerResolver(customerService)
 	cSchema := schema.NewCustomerSchema(cResolver)
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query: cSchema.Query(),
+		Query:    cSchema.Query(),
+		Mutation: cSchema.Mutation(),
 	})
 	if err != nil {
 		log.Println(err)

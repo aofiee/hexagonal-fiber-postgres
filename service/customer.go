@@ -12,5 +12,6 @@ type (
 	CustomerService interface {
 		GetCustomer(id int) (CustomerRes, error)
 		GetCustomers() ([]CustomerRes, error)
+		CreateCustomer(customer *CustomerRes) (CustomerRes, error)
 	}
 )

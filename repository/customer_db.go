@@ -32,3 +32,11 @@ func (c customerRepository) GetByID(id int) (*Customer, error) {
 	}
 	return &customer, nil
 }
+
+func (c customerRepository) CreateCustomer(customer *Customer) (Customer, error) {
+	err := c.db.Create(customer).Error
+	if err != nil {
+		return Customer{}, err
+	}
+	return *customer, nil
+}
